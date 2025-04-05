@@ -38,7 +38,7 @@ int main(int argc, const char **argv)
     else {
         std::cout << "To specify a map file use the following format: " << std::endl;
         std::cout << "Usage: [executable] [-f filename.osm]" << std::endl;
-        osm_data_file = "../map.osm";
+        osm_data_file = "../hochiminh.osm";
     }
     
     std::vector<std::byte> osm_data;
@@ -55,12 +55,18 @@ int main(int argc, const char **argv)
     // TODO 1: Declare floats `start_x`, `start_y`, `end_x`, and `end_y` and get
     // user input for these values using std::cin. Pass the user input to the
     // RoutePlanner object below in place of 10, 10, 90, 90.
+    float start_x, start_y, end_x, end_y;
+    std::cout << "Enter start coordinates (x y): ";
+    std::cin >> start_x >> start_y;
+    std::cout << "Enter end coordinates (x y): ";
+    std::cin >> end_x >> end_y;
+
 
     // Build Model.
     RouteModel model{osm_data};
 
     // Create RoutePlanner object and perform A* search.
-    RoutePlanner route_planner{model, 10, 10, 90, 90};
+    RoutePlanner route_planner{model, start_x, start_y, end_x, end_y};
     route_planner.AStarSearch();
 
     std::cout << "Distance: " << route_planner.GetDistance() << " meters. \n";
@@ -68,7 +74,7 @@ int main(int argc, const char **argv)
     // Render results of search.
     Render render{model};
 
-    auto display = io2d::output_surface{400, 400, io2d::format::argb32, io2d::scaling::none, io2d::refresh_style::fixed, 30};
+    auto display = io2d::output_surface{1200, 901, io2d::format::argb32, io2d::scaling::none, io2d::refresh_style::fixed, 30};
     display.size_change_callback([](io2d::output_surface& surface){
         surface.dimensions(surface.display_dimensions());
     });

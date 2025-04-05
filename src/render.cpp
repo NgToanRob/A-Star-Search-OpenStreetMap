@@ -34,8 +34,8 @@ void Render::Display( io2d::output_surface &surface )
 
 void Render::DrawPath(io2d::output_surface &surface) const{
     io2d::render_props aliased{ io2d::antialias::none };
-    io2d::brush foreBrush{ io2d::rgba_color::orange}; 
-    float width = 5.0f;
+    io2d::brush foreBrush{ io2d::rgba_color::blue}; 
+    float width = 8.0f;
     surface.stroke(foreBrush, PathLine(), std::nullopt, io2d::stroke_props{width});
 
 }
@@ -48,13 +48,15 @@ void Render::DrawEndPosition(io2d::output_surface &surface) const{
     auto pb = io2d::path_builder{}; 
     pb.matrix(m_Matrix);
 
-    pb.new_figure({(float) m_Model.path.back().x, (float) m_Model.path.back().y});
-    float constexpr l_marker = 0.01f;
+    float constexpr l_marker = 0.02f;
+    float half_marker = l_marker / 2.0f;
+    pb.new_figure({(float) m_Model.path.back().x - half_marker, (float) m_Model.path.back().y - half_marker});
     pb.rel_line({l_marker, 0.f});
     pb.rel_line({0.f, l_marker});
     pb.rel_line({-l_marker, 0.f});
     pb.rel_line({0.f, -l_marker});
     pb.close_figure();
+    
     
     surface.fill(foreBrush, pb);
     surface.stroke(foreBrush, io2d::interpreted_path{pb}, std::nullopt, std::nullopt, std::nullopt, aliased);
@@ -69,8 +71,9 @@ void Render::DrawStartPosition(io2d::output_surface &surface) const{
     auto pb = io2d::path_builder{}; 
     pb.matrix(m_Matrix);
 
-    pb.new_figure({(float) m_Model.path.front().x, (float) m_Model.path.front().y});
-    float constexpr l_marker = 0.01f;
+    float constexpr l_marker = 0.02f;
+    float half_marker = l_marker / 2.0f;
+    pb.new_figure({(float) m_Model.path.front().x - half_marker, (float) m_Model.path.front().y - half_marker});
     pb.rel_line({l_marker, 0.f});
     pb.rel_line({0.f, l_marker});
     pb.rel_line({-l_marker, 0.f});
