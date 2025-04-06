@@ -103,3 +103,74 @@ The testing executable is also placed in the `build` directory. From within `bui
 * If you are facing errors with --config try to remove -- from the command.
 
 
+## Data flow
+Chương trình này là một ứng dụng lập kế hoạch tuyến đường (Route Planner) sử dụng thuật toán A* để tìm đường đi ngắn nhất trên bản đồ OSM (OpenStreetMap). Dưới đây là giải thích chi tiết về **luồng dữ liệu (data flow)** của chương trình:
+
+---
+
+### **1. Nhập dữ liệu bản đồ**
+- **Nguồn dữ liệu**:
+  - Dữ liệu bản đồ được lưu trong các tệp `.osm` (ví dụ: hochiminh.osm, map.osm).
+  - Các tệp này chứa thông tin về các nút (nodes), đường (ways), và quan hệ (relations) trong định dạng XML.
+- **Quá trình nhập**:
+  - Hàm `ReadFile()` trong `main.cpp` được sử dụng để đọc tệp `.osm` và tải dữ liệu vào bộ nhớ.
+  - Thư viện `pugixml` được sử dụng để phân tích cú pháp (parse) dữ liệu XML và xây dựng cấu trúc cây DOM trong bộ nhớ.
+
+---
+
+### **2. Xử lý dữ liệu bản đồ**
+- **Chuyển đổi dữ liệu**:
+  - Dữ liệu từ tệp `.osm` được chuyển đổi thành một mô hình bản đồ (`RouteModel`) trong chương trình.
+  - Lớp `RouteModel` (được định nghĩa trong `src/route_model.cpp`) mở rộng lớp `Model` để thêm các chức năng liên quan đến thuật toán tìm đường.
+- **Tìm nút gần nhất**:
+  - Hàm `FindClosestNode()` trong `RouteModel` được sử dụng để tìm các nút gần nhất với vị trí bắt đầu và kết thúc do người dùng chỉ định.
+  - Điều này giúp xác định điểm bắt đầu và điểm kết thúc trong thuật toán A*.
+
+---
+
+### **3. Tìm đường đi ngắn nhất (A* Search)**
+- **Khởi tạo thuật toán**:
+  - Lớp `RoutePlanner` (được định nghĩa trong `src/route_planner.cpp`) thực hiện thuật toán A*.
+  - Hàm `AStarSearch()` được gọi từ `main()` để bắt đầu quá trình tìm kiếm.
+- **Quá trình tìm kiếm**:
+  - **Danh sách mở (`open_list`)**:
+    - Lưu trữ các nút cần được kiểm tra.
+    - Nút có giá trị `f = g + h` nhỏ nhất được chọn để kiểm tra tiếp theo (hàm `NextNode()`).
+  - **Tìm nút lân cận**:
+    - Hàm `AddNeighbors()` được gọi để tìm các nút lân cận của nút hiện tại.
+    - Với mỗi nút lân cận:
+      - Tính giá trị `g` (khoảng cách từ nút bắt đầu đến nút hiện tại).
+      - Tính giá trị `h` (ước lượng khoảng cách từ nút hiện tại đến nút đích) bằng hàm `CalculateHValue()`.
+      - Thêm nút lân cận vào danh sách mở.
+  - **Xây dựng đường đi cuối cùng**:
+    - Khi tìm thấy nút đích, hàm `ConstructFinalPath()` được gọi để xây dựng đường đi từ nút đích về nút bắt đầu bằng cách lần theo các nút cha (parent).
+
+---
+
+### **4. Xuất dữ liệu**
+- **Hiển thị kết quả**:
+  - Lớp `Render` (được định nghĩa trong `src/render.cpp`) được sử dụng để hiển thị bản đồ và đường đi ngắn nhất.
+  - Kết quả được vẽ lên hình ảnh bản đồ (ví dụ: hochiminh.png hoặc map.png).
+- **Lưu kết quả**:
+  - Nếu cần, kết quả có thể được lưu lại dưới dạng tệp hoặc in ra màn hình.
+
+---
+
+### **5. Kiểm thử**
+- **Thư viện Google Test**:
+  - Các tệp trong thư mục googletest được sử dụng để kiểm thử các thành phần của chương trình.
+  - Ví dụ: Các bài kiểm thử trong test_document.cpp hoặc test_write.cpp kiểm tra tính đúng đắn của việc xử lý dữ liệu XML.
+
+---
+
+### **Tóm tắt luồng dữ liệu**
+1. **Nhập dữ liệu**:
+   - Tệp `.osm` được đọc và phân tích cú pháp để tạo cấu trúc cây DOM.
+   - Dữ liệu được chuyển đổi thành mô hình bản đồ (`RouteModel`).
+2. **Xử lý dữ liệu**:
+   - Tìm nút gần nhất với vị trí bắt đầu và kết thúc.
+   - Thực hiện thuật toán A* để tìm đường đi ngắn nhất.
+3. **Xuất dữ liệu**:
+   - Hiển thị kết quả trên bản đồ hoặc lưu kết quả vào tệp.
+4. **Kiểm thử**:
+   - Sử dụng Google Test để đảm bảo tính đúng đắn của các thành phần.
